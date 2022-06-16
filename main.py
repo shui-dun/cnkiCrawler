@@ -1,6 +1,6 @@
 import os
 
-from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import ElementNotInteractableException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
@@ -11,9 +11,12 @@ import time
 
 def info(driver):
     # 得到摘要
-    button = WebDriverWait(driver, 3).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#ChDivSummaryMore"))
-    )
+    try:
+        button = WebDriverWait(driver, 3).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#ChDivSummaryMore"))
+        )
+    except TimeoutException as e:
+        return 'error'
     try:
         driver.execute_script("arguments[0].scrollIntoView(true);", button)
         button.click()
@@ -40,6 +43,7 @@ def crawler(driver: webdriver.Chrome, keyword, nPages):
     # 进入网页
     url = r'https://chkdx.cnki.net/KNS/Brief/singleResult.aspx?code=CHKJ&kw={}'.format(keyword)
     driver.get(url)
+    # 手动调整起始页数
     input()
     # 进入iframe
     iframe = WebDriverWait(driver, 3).until(
